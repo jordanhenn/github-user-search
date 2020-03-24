@@ -1,9 +1,21 @@
+const apiKey = 'zU9FvtKJuSTtJgZE0Cg3tEJC3LtfZLJ9rTTwRCOl';
+
+const searchURL = "https://api.nps.gov/api/v1/parks";
 
 
-const searchURL = "https://api.github.com/users/"
+function formatQueryParams(params){
+    const queryItems = Object.keys(params).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+    return queryItems.join('&');
+}
 
-function getRepos(searchTerm){
-    const url = searchURL + `${searchTerm}/repos`;
+function getParks(query, maxResults=50){
+    const params = {
+        stateCode: query,
+        limit: maxResults,
+        api_key: apiKey
+    }
+    const queryString = formatQueryParams(params);
+    const url = searchURL + '?' + queryString;
     console.log(url);
     fetch(url)
         .then(response => {
@@ -12,18 +24,27 @@ function getRepos(searchTerm){
         }
         throw new Error(response.statusText);
         })
-        .then(responseJson => displayRepos(responseJson))
+        .then(responseJson => displayParks(responseJson))
         .catch(err => {
             $('.js-error-message').text(`Error: ${err.message}`);
     });
 }
 
-function displayRepos(responseJson) {
+function displayParks(responseJson) {
     console.log(responseJson);
     $('.js-results-area').removeClass('hidden');
-    for (let i = 0; i < responseJson.length; i++){
+    for (let i = 0; i < responseJson.data.length; i++){
         $('.js-results').append(
-            `<li><h3><a href="${responseJson[i].html_url}">${responseJson[i].name}</a></h3></li>`   
+            `<li>
+            <h3 class="parkname"><a href="${responseJson.data[i].url}">${responseJson.data[i].name}</a></h3>
+            <p class="description">Description: ${responseJson.data[i].description}</p>
+            <div class="address">
+                <p>Address:</p>
+                <p>${responseJson.data[i].addresses[1].line1}</p>
+                <p>${responseJson.data[i].addresses[1].line2}</p>
+                <p>${responseJson.data[i].addresses[1].line3}</p>
+                <p>${responseJson.data[i].addresses[1].city}, ${responseJson.data[i].addresses[1].stateCode} ${responseJson.data[i].addresses[1].postalCode}</p>
+            </li>`   
         );
     }
 }
@@ -34,8 +55,9 @@ $('.js-search').submit(event => {
     $('.js-results-area').addClass('hidden');
     $('.js-results').empty();
     $('.js-error-message').text('');
-    const searchTerm = $('.js-search-item').val();
-    getRepos(searchTerm);
+    const stateCodes = $('.js-state-codes').val();
+    const maxResults = $('.js-max-results').val();
+    getParks(stateCodes, maxResults);
 });
 }
 
