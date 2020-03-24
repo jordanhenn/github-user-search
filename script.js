@@ -33,6 +33,9 @@ function getParks(query, maxResults=50){
 function displayParks(responseJson) {
     console.log(responseJson);
     $('.js-results-area').removeClass('hidden');
+    if (responseJson.total == 0) {
+        $('.js-error-message').text("No results found");
+    } else {
     for (let i = 0; i < responseJson.data.length; i++){
         $('.js-results').append(
             `<li>
@@ -40,13 +43,14 @@ function displayParks(responseJson) {
             <p class="description">Description: ${responseJson.data[i].description}</p>
             <div class="address">
                 <p>Address:</p>
-                <p>${responseJson.data[i].addresses[1].line1}</p>
-                <p>${responseJson.data[i].addresses[1].line2}</p>
-                <p>${responseJson.data[i].addresses[1].line3}</p>
-                <p>${responseJson.data[i].addresses[1].city}, ${responseJson.data[i].addresses[1].stateCode} ${responseJson.data[i].addresses[1].postalCode}</p>
+                <p>${responseJson.data[i].addresses[0].line1}</p>
+                <p>${responseJson.data[i].addresses[0].line2}</p>
+                <p>${responseJson.data[i].addresses[0].line3}</p>
+                <p>${responseJson.data[i].addresses[0].city}, ${responseJson.data[i].addresses[0].stateCode} ${responseJson.data[i].addresses[0].postalCode}</p>
             </li>`   
         );
     }
+}
 }
 
 function watchForm(){
